@@ -1,24 +1,41 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import React, { useEffect } from "react";
+import { Router, Route, Switch, Redirect } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import { history } from "./_helpers";
+import { alertActions } from "./_actions";
+import { PrivateRoute } from './_components';
+import { HomePage } from './_components';
+import { LoginPage } from './_components';
+import { RegisterPage } from './_components';
 
 function App() {
+  const alert = useSelector((state) => state.alert);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    history.listen((location, action) => {
+      // clear alert on location change
+      dispatch(alertActions.clear());
+    });
+  }, [dispatch]);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="jumbotron">
+      <div className="container">
+        <div className="col-md-8 offset-md-2">
+          {alert.message && (
+            <div className={`alert ${alert.type}`}>{alert.message}</div>
+          )}
+          <Router history={history}>
+            <Switch>
+              <PrivateRoute exact path="/" component={HomePage} />
+              <Route path="/login" component={LoginPage} />
+              <Route path="/register" component={RegisterPage} />
+              <Redirect from="*" to="/" />
+            </Switch>
+          </Router>
+        </div>
+      </div>
     </div>
   );
 }
